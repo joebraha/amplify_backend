@@ -1,4 +1,4 @@
-#!/Users/noahlapoint/tgenv/bin/python
+#!/Users/noahlapoint/amplify_backend/tgenv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

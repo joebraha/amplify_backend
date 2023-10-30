@@ -1,8 +1,6 @@
 from tg import expose, TGController
 from tg import MinimalApplicationConfigurator
 
-print("Here")
-
 class RootController(TGController):
     @expose()
     def index(self):

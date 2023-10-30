@@ -32,7 +32,7 @@ export-env {
       }
     }
 
-    let virtual_env = '/Users/noahlapoint/tgenv'
+    let virtual_env = '/Users/noahlapoint/amplify_backend/tgenv'
     let bin = 'bin'
 
     let is_windows = ($nu.os-info.family) == 'windows'
