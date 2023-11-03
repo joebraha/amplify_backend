@@ -38,7 +38,7 @@ install_requires = [
     "Beaker >= 1.8.0",
     "Kajiki >= 0.6.3",
     "zope.sqlalchemy >= 1.2",
-    "sqlalchemy",
+    "sqlalchemy < 1.4",
     "alembic",
     "repoze.who",
     "tw2.forms",
