@@ -1,4 +1,0 @@
-recursive-include beathoven/public *
-include beathoven/public/favicon.ico
-recursive-include beathoven/i18n *
-recursive-include beathoven/templates *
