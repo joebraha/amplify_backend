@@ -1,0 +1,79 @@
+body {
+  margin: 0; /* Remove default body margin */
+  background-color: #282c34; /* Set background color to match App-header */
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-around;
+  background-color: #282c34;
+  padding: 10px;
+}
+
+.toolbar-link {
+  text-decoration: none;
+  color: #000;
+  position: relative;
+}
+
+.toolbar-link:before {
+  content: attr(data-text); /* Initially set content to data-text attribute */
+  position: absolute;
+  opacity: 0; /* Initially set opacity to 0 */
+  transition: opacity 0.3s ease-in-out; /* Add transition effect */
+}
+
+.toolbar-link:hover:before {
+  opacity: 1; /* Show the text on hover */
+}
+
+.toolbar-link:hover {
+  color: #007bff;
+}
+.container {
+  text-align: center; /* Center align the content */
+}
+
+.center {
+  text-align: center; /* Center align the content within this div */
+  margin-top: 20px; /* Add some space above the centered content */
+}
