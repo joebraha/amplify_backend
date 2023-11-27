@@ -1,4 +1,33 @@
 from pydantic import BaseModel
+import datetime as _dt
+
+class UserBase(BaseModel):
+    email: str
+    library_id: int
+
+class UserCreate(UserBase):
+    hased_password: str
+
+    class config: 
+        orm_mode = True
+
+class leadBase(BaseModel):
+    name: str
+    email: str
+    
+class leadCreate(leadBase):
+    pass
+
+class lead(leadBase):
+    id: int
+    owner_id: int
+    date_created: _dt.datetime
+    date_last_updated: _dt.datetime # needed? 
+
+    class config:
+        orm_mode = True
+
+
 
 class CreateMusicLibraryRequest(BaseModel):
 

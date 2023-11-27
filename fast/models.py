@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func 
 
 import datetime as _dt
-import sqlalchemy as import sqlalchemy.orm as _orm
+import sqlalchemy.orm as _orm
 import passlib.hash as _hash
 
 class Song(Base):
@@ -57,7 +57,7 @@ class Music_Library(Base):
     user_id = Column(Integer,ForeignKey('user.user_id'), primary_key = True,)
     storage_left = Column(Integer)
 
-class Lead(_database.Base):
+class Lead(Base):
     __tablename__ = "leads"
     id = Column(Integer, primary_key=True, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
