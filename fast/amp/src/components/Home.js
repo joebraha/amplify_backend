@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faAddressCard, faSearch, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-
+import { Text } from 'react-native';
 // text font 
 // import WordArt from 'react-wordart';
 // <WordArt text='Amplify' theme={`blues`} fontSize={100}>

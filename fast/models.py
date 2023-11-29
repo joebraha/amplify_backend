@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func 
 
 import datetime as _dt
-import sqlalchemy.orm as _orm
 import passlib.hash as _hash
 
 class Song(Base):
@@ -34,7 +33,7 @@ class User(Base):
 
     hashed_password = Column(String)
 
-    leads = _orm.relationship("Lead", back_populates="owner")
+    leads = relationship("Lead", back_populates="owner")
 
     def verify_password(self, password: str):
         return _hash.bcrypt.verify(password, self.hashed_password)
@@ -69,4 +68,4 @@ class Lead(Base):
     date_created = Column(DateTime, default=_dt.datetime.utcnow)
     date_last_updated = Column(DateTime, default=_dt.datetime.utcnow)
 
-    owner = _orm.relationship("User", back_populates="leads")
+    owner = relationship("User", back_populates="leads")

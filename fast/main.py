@@ -1,13 +1,13 @@
 from fastapi import FastAPI, Depends
-from .schemas import CreateMusicLibraryRequest
+from schemas import CreateMusicLibraryRequest
 from sqlalchemy.orm import Session
-from .database import get_db
-from .models import Music_Library, Song, Music_Generator, User, Streaming_Service
+from database import get_db
+from models import Music_Library, Song, Music_Generator, User, Streaming_Service
 
 from typing import List
-# import fastapi.security as _security 
+import fastapi.security as _security 
 
-from .schemas import UserCreate, User, Lead, LeadCreate 
+from schemas import UserCreate, lead, leadCreate 
 
 app = FastAPI()
 
@@ -83,13 +83,13 @@ async def get_user(user: User = Depends(get_current_user)):
 
 @app.post("/api/leads", response_model=Lead)
 async def create_lead(
-    lead: LeadCreate,
+    lead: leadCreate,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),):
     return await create_lead(user=user, db=db, lead=lead)
 
 
-@app.get("/api/leads", response_model=List[Lead])
+@app.get("/api/leads", response_model=List[lead])
 async def get_leads(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),):
@@ -116,7 +116,7 @@ async def delete_lead(
 @app.put("/api/leads/{lead_id}", status_code=200)
 async def update_lead(
     lead_id: int,
-    lead: LeadCreate,
+    lead: leadCreate,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),):
     await update_lead(lead_id, lead, user, db)

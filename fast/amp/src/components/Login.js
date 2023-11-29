@@ -2,8 +2,7 @@ import React, { useState } from "react";
 // importing Link from react-router-dom to navigate to  
 // different end points. 
 import { Link } from "react-router-dom"; 
-import { useState, useEffect } from "react";
-import api from './api'
+import api from '../api'
 import "../App.css";
   
 
