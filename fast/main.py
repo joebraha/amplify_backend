@@ -1,13 +1,20 @@
 from fastapi import FastAPI, Depends
-from .schemas import CreateMusicLibraryRequest
+from schemas import CreateMusicLibraryRequest
 from sqlalchemy.orm import Session
-from .database import get_db
-from .models import Music_Library, Song, Music_Generator, User, Streaming_Service
+from database import get_db
+from models import Music_Library, Song, Music_Generator, User, Streaming_Service
+from fastapi.exceptions import HTTPException
+from fastapi.security import oauth2_scheme, OAuth2PasswordRequestForm
 
 from typing import List
 # import fastapi.security as _security 
 
-from .schemas import UserCreate, User, Lead, LeadCreate 
+from schemas import UserCreate, User, lead, leadCreate 
+
+import services as _services, schemas as _schemas
+
+
+# import databases.py as _db
 
 app = FastAPI()
 
@@ -53,43 +60,65 @@ async def post_user_playlists(user_id: int, db: Session = Depends(get_db)):
 
 #################################################################################
 
-
 @app.post("/api/users")
 async def create_user(
     user: UserCreate, db: Session = Depends(get_db)):
-    db_user = await get_user_by_email(user.email, db)
+    db_user = await _services.get_user_by_email(user.email, db)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already in use")
 
     user = await create_user(user, db)
-    return await create_token(user)
+    return await _services.create_token(user)
 
+@app.post("/api/users")
+async def authenticate_user(
+    email: str, password: str, db: Session = Depends(get_db)):
+    user = await authenticate_user(email, password, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid Credentials")
+
+    return await _services.create_token(user)
 
 @app.post("/api/token")
 async def generate_token(
-    form_data: _security.OAuth2PasswordRequestForm = Depends(),
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),):
     user = await authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid Credentials")
 
-    return await create_token(user)
+    return await _services.create_token(user)
 
+@app.post("/api/token/refresh")
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),):
+    try:
+        payload = decode_token(token)
+        token_data = TokenPayload(**payload)
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid Credentials")
+
+    user = await _services.get_user_by_id(db, user_id=token_data.user_id)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid Credentials")
+
+    return await _services.create_token(user)
 
 @app.get("/api/users/me", response_model=User)
 async def get_user(user: User = Depends(get_current_user)):
     return user
 
 
-@app.post("/api/leads", response_model=Lead)
+@app.post("/api/leads", response_model=lead)
 async def create_lead(
-    lead: LeadCreate,
+    lead: leadCreate,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),):
     return await create_lead(user=user, db=db, lead=lead)
 
 
-@app.get("/api/leads", response_model=List[Lead])
+@app.get("/api/leads", response_model=List[lead])
 async def get_leads(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),):
@@ -116,7 +145,7 @@ async def delete_lead(
 @app.put("/api/leads/{lead_id}", status_code=200)
 async def update_lead(
     lead_id: int,
-    lead: LeadCreate,
+    lead: create_lead(),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),):
     await update_lead(lead_id, lead, user, db)
