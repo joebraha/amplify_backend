@@ -5,16 +5,22 @@ import models
 from database import SessionLocal,engine  # Adjust the import path accordingly
 from typing import Annotated
 import crud
+from models import Music_Library, Song, Music_Generator, User, Streaming_Service
+from fastapi.exceptions import HTTPException
+from fastapi.security import oauth2_scheme, OAuth2PasswordRequestForm
 
 from typing import List
 import fastapi.security as _security 
 from fastapi.middleware.cors import CORSMiddleware
 
-# from schemas import UserCreate, lead, leadCreate 
+import sqlalchemy.orm as _orm
 
+import services as _services, schemas as _schemas
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+
 
 origins = [
     "http://localhost:3000/",  # Add the actual origin of your frontend application
@@ -86,72 +92,81 @@ async def post_user_playlists(user_id: int, db: Session = Depends(get_db)):
     result = db.query(Song.song_name).filter(Song.user_id == user_id).order_by(Song.song_id.desc()).limit(5)
     return result
 
-#################################################################################
 
-@app.post("/api/users", response_model = CreateUserRequest)
-async def create_user(user: User, db: Session = Depends(get_db)):
-    db_user = await get_user_by_email(user.email, db)
+@app.post("/api/users")
+async def create_user(
+    user: _schemas.UserCreate, db: _orm.Session = Depends(_services.get_db)
+):
+    db_user = await _services.get_user_by_email(user.email, db)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already in use")
 
-    user = await create_user(user, db)
-    return await create_token(user)
+    user = await _services.create_user(user, db)
+
+    return await _services.create_token(user)
 
 @app.post("/api/token")
 async def generate_token(
     form_data: _security.OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db),):
-    user = await authenticate_user(form_data.username, form_data.password, db)
+    db: _orm.Session = Depends(_services.get_db),
+):
+    user = await _services.authenticate_user(form_data.username, form_data.password, db)
+
     if not user:
         raise HTTPException(status_code=401, detail="Invalid Credentials")
 
-    return await create_token(user)
+    return await _services.create_token(user)
 
 
-@app.get("/api/users/me", response_model=User)
-async def get_user(user: User = Depends(get_current_user)):
+@app.get("/api/users/me", response_model=_schemas.User)
+async def get_user(user: _schemas.User = Depends(_services.get_current_user)):
     return user
 
 
-@app.post("/api/leads", response_model=Lead)
+@app.post("/api/leads", response_model=_schemas.Lead)
 async def create_lead(
-    lead: leadCreate,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),):
-    return await create_lead(user=user, db=db, lead=lead)
+    lead: _schemas.LeadCreate,
+    user: _schemas.User = Depends(_services.get_current_user),
+    db: _orm.Session = Depends(_services.get_db),
+):
+    return await _services.create_lead(user=user, db=db, lead=lead)
 
 
-@app.get("/api/leads", response_model=List[lead])
+@app.get("/api/leads", response_model=List[_schemas.Lead])
 async def get_leads(
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),):
-    return await get_leads(user=user, db=db)
+    user: _schemas.User = Depends(_services.get_current_user),
+    db: _orm.Session = Depends(_services.get_db),
+):
+    return await _services.get_leads(user=user, db=db)
 
 
 @app.get("/api/leads/{lead_id}", status_code=200)
 async def get_lead(
     lead_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),):
-    return await get_lead(lead_id, user, db)
+    user: _schemas.User = Depends(_services.get_current_user),
+    db: _orm.Session = Depends(_services.get_db),
+):
+    return await _services.get_lead(lead_id, user, db)
 
 
 @app.delete("/api/leads/{lead_id}", status_code=204)
 async def delete_lead(
     lead_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),):
-    await delete_lead(lead_id, user, db)
+    user: _schemas.User = Depends(_services.get_current_user),
+    db: _orm.Session = Depends(_services.get_db),
+):
+    await _services.delete_lead(lead_id, user, db)
     return {"message", "Successfully Deleted"}
 
 
 @app.put("/api/leads/{lead_id}", status_code=200)
 async def update_lead(
     lead_id: int,
-    lead: leadCreate,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),):
-    await update_lead(lead_id, lead, user, db)
+    lead: _schemas.LeadCreate,
+    user: _schemas.User = Depends(_services.get_current_user),
+    db: _orm.Session = Depends(_services.get_db),
+):
+    await _services.update_lead(lead_id, lead, user, db)
     return {"message", "Successfully Updated"}
 
 
