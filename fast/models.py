@@ -26,17 +26,19 @@ class Music_Generator(Base):
 class User(Base):
     __tablename__ = "user"
 
-    user_id = Column(Integer, primary_key = True, index = True) 
+    username = Column(String, primary_key = True, index = True) 
+    password = Column(String, primary_key = True, index = True)
+    user_id = Column(Integer, primary_key = True, index = True, autoincrement=True)
     email = Column(String, unique = True, index = True)
     library_id = Column(Integer, ForeignKey('Music_Library.user_id'))
     phone_number = Column(String)
 
-    hashed_password = Column(String)
+    # hashed_password = Column(String)
 
-    leads = _orm.relationship("Lead", back_populates="owner")
+    # leads = relationship("Lead", back_populates="owner")
 
-    def verify_password(self, password: str):
-        return _hash.bcrypt.verify(password, self.hashed_password)
+    # def verify_password(self, password: str):
+    #     return _hash.bcrypt.verify(password, self.hashed_password)
 
 class Streaming_Service(Base):
     __tablename__ = "streaming_service"
@@ -59,7 +61,7 @@ class Music_Library(Base):
 class Lead(Base):
     __tablename__ = "leads"
     id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("user.user_id"))
     first_name = Column(String, index=True)
     last_name = Column(String, index=True)
     email = Column(String, index=True)

@@ -1,26 +1,63 @@
 from fastapi import FastAPI, Depends
-from schemas import CreateMusicLibraryRequest
+from schemas import CreateMusicLibraryRequest, UserSchema, RequestUser
 from sqlalchemy.orm import Session
-from database import get_db
+import models
+from database import SessionLocal,engine  # Adjust the import path accordingly
+from typing import Annotated
+import crud
 from models import Music_Library, Song, Music_Generator, User, Streaming_Service
 from fastapi.exceptions import HTTPException
 from fastapi.security import oauth2_scheme, OAuth2PasswordRequestForm
 import requests
 
 from typing import List
-import fastapi.security as _security
+import fastapi.security as _security 
+from fastapi.middleware.cors import CORSMiddleware
 
 import sqlalchemy.orm as _orm
 
 import services as _services, schemas as _schemas
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 AI_URL = ""
 
 
+
+origins = [
+    "http://localhost:3000/",  # Add the actual origin of your frontend application
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials = True,
+    allow_methods = ['*'],
+    allow_headers = ['*']
+)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+db_dependency = Annotated[Session, Depends(get_db)]
+
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello, World!"}
+
+@app.post("/CreateAccount")
+async def create_user(request: RequestUser,db: Session = Depends(get_db)):
+    crud.create_user(db, request.parameter)
+    return {"message": "Created new user"}
+
 @app.post("/")
-def create(details: CreateMusicLibraryRequest, db: Session = Depends(get_db)):
+def create_music_library(details: CreateMusicLibraryRequest, db: Session = Depends(get_db)):
     to_create = Music_Library(
         songs = details.songs,
         storage_used = details.storage_used,
@@ -47,7 +84,6 @@ def delete(user_id: int, db: Session = Depends(get_db)):
 @app.put("/")
 def update_item(user_id: int, db: Session = Depends(get_db)):
     return {'name':item.name, } 
-
 
 @app.get("/")
 async def post_recent_music(recent_songs: str, db: Session = Depends(get_db)):
@@ -76,7 +112,6 @@ async def create_user(
     user = await _services.create_user(user, db)
 
     return await _services.create_token(user)
-
 
 @app.post("/api/token")
 async def generate_token(

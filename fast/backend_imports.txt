@@ -1,0 +1,5 @@
+
+
+pip install passlib
+pip install python-multipart
+pip install fastapi.security
