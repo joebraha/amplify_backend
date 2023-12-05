@@ -1,9 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Optional
 import datetime as _dt
 
 class UserBase(BaseModel):
     email: str
     library_id: int
+    
 
 class UserCreate(UserBase):
     hased_password: str
@@ -28,6 +30,18 @@ class lead(leadBase):
         orm_mode = True
 
 
+class UserSchema(BaseModel):
+    user_id: Optional[int] = None
+    email: Optional[str] = None
+    library_id: Optional[int] = None
+    phone_number: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+class RequestUser(BaseModel):
+    parameter: UserSchema = Field(...)
+
 
 class CreateMusicLibraryRequest(BaseModel):
 
@@ -36,12 +50,6 @@ class CreateMusicLibraryRequest(BaseModel):
     user_id: int
     storage_left: int
 
-class CreateUserRequest(BaseModel):
-
-    user_id: int
-    email: str
-    library_id: int
-    phone_number: str
 
 class CreateSongRequest(BaseModel):
 
