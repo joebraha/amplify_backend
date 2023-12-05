@@ -5,6 +5,7 @@ from database import get_db
 from models import Music_Library, Song, Music_Generator, User, Streaming_Service
 from fastapi.exceptions import HTTPException
 from fastapi.security import oauth2_scheme, OAuth2PasswordRequestForm
+import requests
 
 from typing import List
 import fastapi.security as _security
@@ -14,6 +15,8 @@ import sqlalchemy.orm as _orm
 import services as _services, schemas as _schemas
 
 app = FastAPI()
+
+AI_URL = ""
 
 
 @app.post("/")
@@ -56,6 +59,11 @@ async def post_user_playlists(user_id: int, db: Session = Depends(get_db)):
     result = db.query(Song.song_name).filter(Song.user_id == user_id).order_by(Song.song_id.desc()).limit(5)
     return result
 
+# prompts AI server for wav file. Returns file (not JSON)
+@app.get("/generate/{input}")
+async def prompt_model(input: str):
+    r = await requests.get(AI_URL + input)
+    return r
 
 @app.post("/api/users")
 async def create_user(
