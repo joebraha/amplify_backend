@@ -13,22 +13,6 @@ class UserCreate(UserBase):
     class config: 
         orm_mode = True
 
-class leadBase(BaseModel):
-    name: str
-    email: str
-    
-class leadCreate(leadBase):
-    pass
-
-class lead(leadBase):
-    id: int
-    owner_id: int
-    date_created: _dt.datetime
-    date_last_updated: _dt.datetime # needed? 
-
-    class config:
-        orm_mode = True
-
 
 class User(BaseModel):
     user_id: Optional[int] = None

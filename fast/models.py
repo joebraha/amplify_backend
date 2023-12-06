@@ -57,17 +57,3 @@ class Music_Library(Base):
     storage_used = Column(Integer)
     user_id = Column(Integer,ForeignKey('user.user_id'), primary_key = True,)
     storage_left = Column(Integer)
-
-class Lead(Base):
-    __tablename__ = "leads"
-    id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey("user.user_id"))
-    first_name = Column(String, index=True)
-    last_name = Column(String, index=True)
-    email = Column(String, index=True)
-    company = Column(String, index=True, default="")
-    note = Column(String, default="")
-    date_created = Column(DateTime, default=_dt.datetime.utcnow)
-    date_last_updated = Column(DateTime, default=_dt.datetime.utcnow)
-
-    owner = relationship("User", back_populates="leads")
