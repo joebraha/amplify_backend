@@ -30,7 +30,7 @@ class lead(leadBase):
         orm_mode = True
 
 
-class UserSchema(BaseModel):
+class User(BaseModel):
     user_id: Optional[int] = None
     email: Optional[str] = None
     library_id: Optional[int] = None
@@ -40,7 +40,7 @@ class UserSchema(BaseModel):
         orm_mode = True
 
 class RequestUser(BaseModel):
-    parameter: UserSchema = Field(...)
+    parameter: User = Field(...)
 
 
 class CreateMusicLibraryRequest(BaseModel):

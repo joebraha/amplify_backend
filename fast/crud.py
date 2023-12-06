@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models import User
-from schemas import UserSchema
+from schemas import User as UserSchema
 
 def get_user(db: Session, skip: int= 0, limit: int = 5):
     return db.query(User).offset(skip).limit(limit).all()

@@ -73,7 +73,7 @@ async def get_current_user(
     return _schemas.User.from_orm(user)
 
 
-async def create_lead(user: _schemas.User, db: _orm.Session, lead: _schemas.LeadCreate):
+async def create_lead(user: _schemas.User, db: _orm.Session, lead: _schemas.leadCreate):
     lead = _models.Lead(**lead.dict(), owner_id=user.id)
     db.add(lead)
     db.commit()
@@ -113,7 +113,7 @@ async def delete_lead(lead_id: int, user: _schemas.User, db: _orm.Session):
     db.delete(lead)
     db.commit()
 
-async def update_lead(lead_id: int, lead: _schemas.LeadCreate, user: _schemas.User, db: _orm.Session):
+async def update_lead(lead_id: int, lead: _schemas.leadCreate, user: _schemas.User, db: _orm.Session):
     lead_db = await _lead_selector(lead_id, user, db)
 
     lead_db.first_name = lead.first_name

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from schemas import CreateMusicLibraryRequest, UserSchema, RequestUser
+from schemas import CreateMusicLibraryRequest, User, RequestUser
 from sqlalchemy.orm import Session
 import models
 from database import SessionLocal,engine  # Adjust the import path accordingly
@@ -7,7 +7,6 @@ from typing import Annotated
 import crud
 from models import Music_Library, Song, Music_Generator, User, Streaming_Service
 from fastapi.exceptions import HTTPException
-from fastapi.security import oauth2_scheme, OAuth2PasswordRequestForm
 import requests
 
 from typing import List
