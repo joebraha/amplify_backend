@@ -21,7 +21,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-AI_URL = ""
+AI_URL = "https://ba05-34-123-11-187.ngrok.io/run/"
 
 
 
