@@ -8,6 +8,7 @@ import crud
 from models import Song, User
 from fastapi.exceptions import HTTPException
 import requests
+from schemas import ValidationError
 
 from typing import List
 import fastapi.security as _security 
@@ -20,7 +21,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-AI_URL = "https://3e0f-34-34-15-253.ngrok.io/run/"
+AI_URL = "INSERT URL HERE"
 
 
 origins = [
@@ -49,9 +50,11 @@ def read_root():
 @app.post("/CreateAccount/")
 async def create_user(request: UserCreate,db: Session = Depends(get_db)):
     try:
-        print("Received request:", request)
+        print("Received request:", request.dict())
         crud.create_user(db, request)
-        return {"message": "Created new user"}
+    except ValidationError as e:
+        print("Validation Error:", e.json())
+        raise HTTPException(status_code=422, detail="Validation Error")
     except Exception as e:
         print("Error:", e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
@@ -78,45 +81,59 @@ def delete_user(username: str, db: Session = Depends(get_db)):
 
     return {"message": f"User with username {username} deleted successfully"}
 
+@app.post("/CreateSong/{user_id}")
+async def upload_song(user_id: int, file: str, db: Session = Depends(get_db)):
+    # Check if the user exists
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    # Save the song to the database
+    song = Song(song_file=file, user_id=user_id)
+    db.add(song)
+    db.commit()
 
-# @app.post("/")
-# def create_music_library(details: CreateMusicLibraryRequest, db: Session = Depends(get_db)):
-#     to_create = Music_Library(
-#         songs = details.songs,
-#         storage_used = details.storage_used,
-#         user_id = details.user_id,
-#         storage_left = details.storage_left,
-#     )
-#     db.add(to_create)
-#     db.commit()
-#     return{
-#         "success": True,
-#         "create_id": to_create.id
-#     }
+    return {"filename": file}
 
-# @app.get("/")
-# def get_by_id(user_id: int, db: Session = Depends(get_db)):
-#     return db.query(Music_Library).filter(Music_Library.user_id == user_id).first()
+@app.get("/UserSongs/{user_id}")
+async def get_user_songs(user_id: int, db: Session = Depends(get_db)):
+    try:
+        result = db.query(Song).filter(Song.user_id == user_id).order_by(Song.song_id.desc()).limit(4).all()
+        return result
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
-# @app.delete("/")
-# def delete(user_id: int, db: Session = Depends(get_db)):
-#     db.query(Music_Library).filter(Music_Library.user_id == user_id).delete()
-#     db.commit()
-#     return {"success": True}
+@app.get("/UserFeed/{user_id}")
+async def get_user_songs(user_id: int, db: Session = Depends(get_db)):
+    try:
+        result = db.query(Song).filter(Song.user_id != user_id).order_by(Song.song_id.desc()).limit(4).all()
+        return result
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
-# @app.put("/")
-# def update_item(user_id: int, db: Session = Depends(get_db)):
-#     return {'name':item.name, } 
+@app.delete("/Song/{song_file}")
+async def get_songs_by_id(song_file: str, db: Session = Depends(get_db)):
+    try:
+        result = db.query(Song).filter(Song.song_file == song_file).first()
+        return result
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
-# @app.get("/")
-# async def post_recent_music(recent_songs: str, db: Session = Depends(get_db)):
-#     result = db.query(Song.song_name).order_by(Song.song_id.desc()).limit(5)
-#     return result
-
-# @app.get("/account/playlists")
-# async def post_user_playlists(user_id: int, db: Session = Depends(get_db)):
-#     result = db.query(Song.song_name).filter(Song.user_id == user_id).order_by(Song.song_id.desc()).limit(5)
-#     return result
+@app.get("/Song/{song_file}")
+async def get_songs_by_id(song_file: str, db: Session = Depends(get_db)):
+    try:
+        song = db.query(Song).filter(Song.song_file == song_file).first()
+        if song is None:
+            raise HTTPException(status_code=404, detail=f"Song with file_name {song} not found")
+        db.delete(song)
+        db.commit()
+        return {"message": f"User with username {song} deleted successfully"}
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # prompts AI server for wav file. Returns file (not JSON)
 @app.get("/generate/{input}", response_class=Response)
@@ -126,37 +143,3 @@ async def prompt_model(input: str):
     if r.status_code == 404:
         raise HTTPException(status_code=404, detail="AI Server Error") 
     return Response(content=r.content, status_code=200)
-
-# # @app.post("/api/users")
-# # async def create_user(
-# #     user: _schemas.UserCreate, db: _orm.Session = Depends(_services.get_db)
-# # ):
-# #     db_user = await _services.get_user_by_email(user.email, db)
-# #     if db_user:
-# #         raise HTTPException(status_code=400, detail="Email already in use")
-
-# #     user = await _services.create_user(user, db)
-
-# #     return await _services.create_token(user)
-
-# # @app.post("/api/token")
-# # async def generate_token(
-# #     form_data: _security.OAuth2PasswordRequestForm = Depends(),
-# #     db: _orm.Session = Depends(_services.get_db),
-# # ):
-# #     user = await _services.authenticate_user(form_data.username, form_data.password, db)
-
-# #     if not user:
-# #         raise HTTPException(status_code=401, detail="Invalid Credentials")
-
-# #     return await _services.create_token(user)
-
-
-# # @app.get("/api/users/me", response_model=_schemas.User)
-# # async def get_user(user: _schemas.User = Depends(_services.get_current_user)):
-# #     return user
-
-
-# @app.get("/api")
-# async def root():
-#     return {"message": "Awesome Leads Manager"}
