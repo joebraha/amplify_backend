@@ -2,21 +2,16 @@ from fastapi import FastAPI, Depends, Response
 from schemas import UserCreate
 from sqlalchemy.orm import Session
 import models
-from database import SessionLocal,engine  # Adjust the import path accordingly
-from typing import Annotated
+from database import SessionLocal, engine
 import crud
 from models import Song, User
 from fastapi.exceptions import HTTPException
 import requests
 from schemas import ValidationError
 
-from typing import List
-import fastapi.security as _security 
 from fastapi.middleware.cors import CORSMiddleware
 
-import sqlalchemy.orm as _orm
 
-# import services as _services, schemas as _schemas
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
