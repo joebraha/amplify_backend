@@ -16,7 +16,8 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-AI_URL = "INSERT URL HERE"
+AI_source = "https://9b9d-146-148-64-104.ngrok.io"
+AI_URL = AI_source + "/run/"
 
 
 origins = [
